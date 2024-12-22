@@ -16,9 +16,9 @@ Dict
 Set
 : set `#{1 2 3}`
 
-Nil and None both encode to `nil`; Some and Ok unwrap their values.
+Nil and None both encode to `nil`; Some and Ok unwrap their values. Error emits a tagged value.
 
-Custom types with no parameters encode to keywords with a gleam namespace: `:gleam/North`. Custom types with parameters encode to tagged values, with the parameter values encoded as a vector: `#gleam/Point [2 3]`.
+Custom types with no parameters encode to keywords: `:North`. Custom types with parameters encode to tagged values, with the parameter values encoded as a vector: `#Point [2 3]`.
 
 Bit arrays are not yet encoded.
 

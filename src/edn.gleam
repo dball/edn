@@ -11,16 +11,20 @@ import gleam/string_tree
 import pprint/decoder
 
 pub type Config {
-  Config
+  Config(namespace: Option(String))
+}
+
+fn default_config() -> Config {
+  Config(namespace: None)
 }
 
 pub fn debug(value: a) -> a {
-  value |> with_config(Config) |> io.println_error
+  value |> with_config(default_config()) |> io.println_error
   value
 }
 
 pub fn format(value: a) -> String {
-  with_config(value, Config)
+  with_config(value, default_config())
 }
 
 pub fn with_config(value: a, config: Config) -> String {
@@ -139,6 +143,10 @@ fn format_custom(
   // to let callers specify explicit tag encoding for their own types.
   // For example: birl.Time is maybe the natural host type for #inst,
   // but we don't want to depend on birl here. How to allow?
+  //
+  // Note also gleam doesn't have a qualified package namespace and
+  // never will, so this heuristic is sketchy af. Probably better to
+  // supply these in the default config.
   case name {
     "Set" -> format_custom_set(fields, config)
     "Some" -> format_custom_some(fields, config)
@@ -184,19 +192,25 @@ fn format_custom_ok(fields: List(decoder.Field), config: Config) -> String {
   format_dynamic(v, config)
 }
 
+fn qualify(name: String, config: Config) -> String {
+  case config.namespace {
+    Some(namespace) -> namespace <> "/" <> name
+    None -> name
+  }
+}
+
 fn format_custom_error(fields: List(decoder.Field), config: Config) -> String {
   let assert [decoder.Positional(v)] = fields
   // Seems important to keep the error claim
-  "#gleam/Error " <> format_dynamic(v, config)
+  "#" <> qualify("Error", config) <> " " <> format_dynamic(v, config)
 }
 
-// TODO does beam/gleam have package namespaces
 fn format_custom_general(
   name: String,
   fields: List(decoder.Field),
   config: Config,
 ) -> String {
-  let name = "gleam/" <> name
+  let name = qualify(name, config)
   case fields {
     [] -> ":" <> name
     [field] ->
@@ -237,12 +251,17 @@ fn format_custom_general(
           |> string_tree.append("]")
           |> string_tree.to_string
         }
-        Mixed -> todo
+        Mixed -> {
+          todo
+        }
       }
     }
   }
 }
 
-fn format_foreign(value: String, _config: Config) -> String {
-  "#gleam/Foreign " <> json.string(value) |> json.to_string
+fn format_foreign(value: String, config: Config) -> String {
+  "#"
+  <> qualify("Foreign", config)
+  <> " "
+  <> json.string(value) |> json.to_string
 }

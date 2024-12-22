@@ -41,13 +41,13 @@ type Custom {
 }
 
 pub fn format_custom_test() {
-  edn.format(EnumCase) |> should.equal(":gleam/EnumCase")
+  edn.format(EnumCase) |> should.equal(":EnumCase")
   edn.format(UnaryLabelCase("foo"))
-  |> should.equal("#gleam/UnaryLabelCase \"foo\"")
+  |> should.equal("#UnaryLabelCase \"foo\"")
   edn.format(UnaryPosnCase("foo"))
-  |> should.equal("#gleam/UnaryPosnCase \"foo\"")
+  |> should.equal("#UnaryPosnCase \"foo\"")
   edn.format(MultiCase(name: "foo", hats: 3))
-  |> should.equal("#gleam/MultiCase [\"foo\" 3]")
+  |> should.equal("#MultiCase [\"foo\" 3]")
 }
 
 pub fn format_set_test() {
@@ -61,5 +61,5 @@ pub fn format_option_test() {
 
 pub fn format_error_test() {
   edn.format(Ok("cupid")) |> should.equal("\"cupid\"")
-  edn.format(Error(Nil)) |> should.equal("#gleam/Error nil")
+  edn.format(Error(Nil)) |> should.equal("#Error nil")
 }
